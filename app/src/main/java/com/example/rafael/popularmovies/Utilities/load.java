@@ -18,6 +18,10 @@ public class load {
 
     public static String loadApiKey(Context context) {
 
+        //TODO add your API here
+
+        // return "Your Api here"
+
 
         InputStream inputStream = context.getResources().openRawResource(R.raw.apikey);
         BufferedReader reader = new BufferedReader(

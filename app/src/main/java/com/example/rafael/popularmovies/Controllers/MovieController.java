@@ -18,7 +18,6 @@ public class MovieController {
     public static Retrofit getClient(MainActivity mainActivity){
 
         OkHttpClient.Builder okHttpClientBuilder = new OkHttpClient.Builder();
-
         String url = "http://api.themoviedb.org/3/movie/";
         mRetrofit = new Retrofit.Builder()
                 .baseUrl(url)

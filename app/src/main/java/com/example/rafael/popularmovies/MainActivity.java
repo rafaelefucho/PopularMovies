@@ -51,18 +51,14 @@ public class MainActivity extends AppCompatActivity {
         mMoviesRV.setHasFixedSize(true);
         mMovieAdapterRV = new MovieAdapterRV(MainActivity.this);
         mMoviesRV.setAdapter(mMovieAdapterRV);
-
     }
 
     private void loadDatafromMoviedb() {
 
             final String[] stringJson = new String[1];
 
-            //Based on https://www.youtube.com/watch?v=IQs_TLi5LFI&index=1&list=LLbibWJX9I6FHceHKEsztz0A&t=0s
-            OkHttpClient okHttpClient = new OkHttpClient();
             //TODO to do all the comentaires
             //To add a switch to get popularity or top rated
-            // it goes just here
             // Also to hide the apiKey
             //String url = "http://api.themoviedb.org/3/movie/popular?api_key=" + "1f603ccb7cbe37247347e5a8fbaae643";
 

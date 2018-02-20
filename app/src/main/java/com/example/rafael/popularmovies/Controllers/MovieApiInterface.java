@@ -3,6 +3,7 @@ package com.example.rafael.popularmovies.Controllers;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 
 /**
@@ -12,6 +13,6 @@ import retrofit2.http.Path;
 public interface MovieApiInterface {
 
 
-    @GET("popular?api_key={api}")
-    Call<String> getMovieJson(@Path("api") String api);
+    @GET("popular?")
+        Call<String> getMovieJson(@Query("api_key") String api);
 }
