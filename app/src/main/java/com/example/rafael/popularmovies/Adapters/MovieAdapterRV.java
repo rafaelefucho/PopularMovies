@@ -22,10 +22,16 @@ public class MovieAdapterRV extends RecyclerView.Adapter<MovieAdapterRV.MovieAda
 
     private List<Movies> mMoviesList;
     private Context mContext;
+    private MoviesItemClickListener mMoviesItemClickListener;
+
+
+    public interface MoviesItemClickListener {
+        void onMovieItemClick (Movies clickedMovie);
+    }
 
     public MovieAdapterRV(Context mContext) {
-        this.mMoviesList = mMoviesList;
         this.mContext = mContext;
+        this.mMoviesItemClickListener = (MoviesItemClickListener) mContext;
     }
 
     @Override
@@ -68,10 +74,18 @@ public class MovieAdapterRV extends RecyclerView.Adapter<MovieAdapterRV.MovieAda
             super(itemView);
             mImageViewPoster = itemView.findViewById(R.id.movie_poster_image);
             //Soon to add the onClickListener to the View
+            itemView.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View view) {
+            int clickedPosition = getAdapterPosition();
+            Movies clickedMovie = mMoviesList.get(clickedPosition);
+            if(clickedMovie == null){
+                return;
+            }
+
+            mMoviesItemClickListener.onMovieItemClick(clickedMovie);
 
         }
     }

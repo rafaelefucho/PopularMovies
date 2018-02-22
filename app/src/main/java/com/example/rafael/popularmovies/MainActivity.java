@@ -1,5 +1,6 @@
 package com.example.rafael.popularmovies;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -11,6 +12,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.example.rafael.popularmovies.Adapters.MovieAdapterRV;
 import com.example.rafael.popularmovies.Controllers.MovieApiInterface;
@@ -30,12 +32,14 @@ import okhttp3.Request;
 import okhttp3.Response;
 import retrofit2.Retrofit;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MovieAdapterRV.MoviesItemClickListener{
 
     private List<Movies> mMoviesList;
 
     private RecyclerView mMoviesRV;
     private MovieAdapterRV mMovieAdapterRV;
+
+    private TextView mNoInternetTV;
 
     final private String MOST_POPULAR = "popular";
     final private String TOP_RATED = "top_rated";
@@ -58,18 +62,22 @@ public class MainActivity extends AppCompatActivity {
         mMoviesRV.setHasFixedSize(true);
         mMovieAdapterRV = new MovieAdapterRV(MainActivity.this);
         mMoviesRV.setAdapter(mMovieAdapterRV);
+
+        mNoInternetTV = findViewById(R.id.no_internet);
     }
 
     private void loadDatafromMoviedb(String sortBy) {
 
         if (!NetworkUtils.isInternetConnectionAvailable(MainActivity.this)) {
-            //Need to add another screen for connection failure
+            mMoviesRV.setVisibility(View.GONE);
+            mNoInternetTV.setVisibility(View.VISIBLE);
             return;
         }
+        else {
+            mMoviesRV.setVisibility(View.VISIBLE);
+            mNoInternetTV.setVisibility(View.GONE);
+        }
 
-        //TODO to do all the comentaires
-        //To add a switch to get popularity or top rated
-        // Also to hide the apiKey
         //String url = "http://api.themoviedb.org/3/movie/popular?api_key=" + "1f603ccb7cbe37247347e5a8fbaae643";
 
         MovieApiInterface apiInterface = MovieController
@@ -121,10 +129,12 @@ public class MainActivity extends AppCompatActivity {
                     case 0:
                         //Most Popular
                         loadDatafromMoviedb(MOST_POPULAR);
+                        setTitle("Most Popular");
                         break;
                     case 1:
                         //Top rated
                         loadDatafromMoviedb(TOP_RATED);
+                        setTitle("Top Rated");
                         break;
                 }
             }
@@ -138,5 +148,10 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-
+    @Override
+    public void onMovieItemClick(Movies clickedMovie) {
+        Intent detailActivity = new Intent(this, detailActivity.class);
+        detailActivity.putExtra("currentMovie", clickedMovie);
+        startActivity(detailActivity);
+    }
 }
