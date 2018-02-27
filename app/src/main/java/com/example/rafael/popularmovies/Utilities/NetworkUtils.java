@@ -31,4 +31,6 @@ public class NetworkUtils {
         // otherwise check if we are connected
         return (networkInfo != null && networkInfo.isConnected());
     }
+
+
 }

@@ -1,11 +1,10 @@
 package com.example.rafael.popularmovies;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,20 +16,16 @@ import android.widget.TextView;
 import com.example.rafael.popularmovies.Adapters.MovieAdapterRV;
 import com.example.rafael.popularmovies.Controllers.MovieApiInterface;
 import com.example.rafael.popularmovies.Controllers.MovieController;
+import com.example.rafael.popularmovies.Utilities.Load;
 import com.example.rafael.popularmovies.Utilities.Movies;
 import com.example.rafael.popularmovies.Utilities.NetworkUtils;
 import com.example.rafael.popularmovies.Utilities.Parsing;
-import com.example.rafael.popularmovies.Utilities.load;
 
-import java.io.IOException;
 import java.util.List;
 
 import okhttp3.Call;
 import okhttp3.Callback;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
 import okhttp3.Response;
-import retrofit2.Retrofit;
 
 public class MainActivity extends AppCompatActivity implements MovieAdapterRV.MoviesItemClickListener{
 
@@ -81,10 +76,10 @@ public class MainActivity extends AppCompatActivity implements MovieAdapterRV.Mo
         //String url = "http://api.themoviedb.org/3/movie/popular?api_key=" + "1f603ccb7cbe37247347e5a8fbaae643";
 
         MovieApiInterface apiInterface = MovieController
-                .getClient(this)
+                .getClient()
                 .create(MovieApiInterface.class);
 
-        String url = sortBy + "?api_key=" + load.loadApiKey(this);
+        String url = sortBy + "?api_key=" + Load.loadApiKey(this);
         final retrofit2.Call<String> responseCall = apiInterface.getMovieJson(url);
 
         responseCall.enqueue(new retrofit2.Callback<String>() {

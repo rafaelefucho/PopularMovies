@@ -28,8 +28,9 @@ public class Parsing {
                 String overview = movieIterator.getString("overview");
                 String vote_average = movieIterator.getString("vote_average");
                 String release_date = movieIterator.getString("release_date");
+                String id = movieIterator.getString("id");
 
-                Movies movie = new Movies(original_title,poster_path,overview,vote_average,release_date);
+                Movies movie = new Movies(original_title,poster_path,overview,vote_average,release_date, id);
 
                 moviesList.add(movie);
             }
@@ -39,5 +40,32 @@ public class Parsing {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static List<Review> parseFromJsonReviews(String jsonMovieData) {
+
+        try {
+            List<Review> reviewsList = new ArrayList<>();
+            JSONObject jsonObjectMovieData = new JSONObject(jsonMovieData);
+            JSONArray jsonArrayMovies = jsonObjectMovieData.getJSONArray("results");
+
+            for(int i = 0; i < jsonArrayMovies.length(); i++){
+                JSONObject movieIterator = jsonArrayMovies.getJSONObject(i);
+
+                String author = movieIterator.getString("author");
+                String content = movieIterator.getString("content");
+
+                Review review = new Review(author,content);
+
+                reviewsList.add(review);
+            }
+
+            return reviewsList;
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
+
     }
 }

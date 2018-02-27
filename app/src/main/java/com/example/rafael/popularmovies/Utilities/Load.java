@@ -14,7 +14,7 @@ import java.nio.charset.Charset;
  * Created by Rafael on 20/02/2018.
  */
 
-public class load {
+public class Load {
 
     public static String loadApiKey(Context context) {
 

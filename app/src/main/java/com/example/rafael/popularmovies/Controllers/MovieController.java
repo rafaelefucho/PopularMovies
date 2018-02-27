@@ -1,7 +1,6 @@
 package com.example.rafael.popularmovies.Controllers;
 
 import com.example.rafael.popularmovies.MainActivity;
-import com.example.rafael.popularmovies.Utilities.load;
 
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
@@ -15,7 +14,7 @@ public class MovieController {
 
     private static Retrofit mRetrofit = null;
 
-    public static Retrofit getClient(MainActivity mainActivity){
+    public static Retrofit getClient(){
 
         OkHttpClient.Builder okHttpClientBuilder = new OkHttpClient.Builder();
         String url = "http://api.themoviedb.org/3/movie/";

@@ -14,15 +14,16 @@ public class Movies implements Parcelable{
     private String overview;
     private String vote_average;
     private String release_date;
+    private String movie_id;
 
-    public Movies(String original_title, String poster_path, String overview, String vote_average, String release_date) {
+    public Movies(String original_title, String poster_path, String overview, String vote_average, String release_date, String movie_id) {
         this.original_title = original_title;
         this.poster_path = poster_path;
         this.overview = overview;
         this.vote_average = vote_average;
         this.release_date = release_date;
+        this.movie_id = movie_id;
     }
-
 
     @Override
     public String toString() {
@@ -32,6 +33,7 @@ public class Movies implements Parcelable{
                 ", overview='" + overview + '\'' +
                 ", vote_average='" + vote_average + '\'' +
                 ", release_date='" + release_date + '\'' +
+                ", movie_id='" + movie_id + '\'' +
                 '}';
     }
 
@@ -75,6 +77,10 @@ public class Movies implements Parcelable{
         this.release_date = release_date;
     }
 
+    public String getMovie_id() { return movie_id;    }
+
+    public void setMovie_id(String movie_id) { this.movie_id = movie_id; }
+
     @Override
     public int describeContents() {
         return 0;
@@ -87,6 +93,7 @@ public class Movies implements Parcelable{
         parcel.writeString(overview);
         parcel.writeString(vote_average);
         parcel.writeString(release_date);
+        parcel.writeString(movie_id);
     }
 
     protected Movies(Parcel in) {
@@ -95,6 +102,7 @@ public class Movies implements Parcelable{
         overview = in.readString();
         vote_average = in.readString();
         release_date = in.readString();
+        movie_id = in.readString();
     }
 
     public static final Creator<Movies> CREATOR = new Creator<Movies>() {
