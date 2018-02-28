@@ -1,13 +1,22 @@
 package com.example.rafael.popularmovies;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.text.Html;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.example.rafael.popularmovies.Adapters.ReviewArrayAdapter;
+import com.example.rafael.popularmovies.Adapters.ReviewRVAdapter;
+import com.example.rafael.popularmovies.Adapters.TrailerAdapterRV;
 import com.example.rafael.popularmovies.Controllers.MovieApiInterface;
 import com.example.rafael.popularmovies.Controllers.MovieController;
 import com.example.rafael.popularmovies.Utilities.Load;
@@ -17,12 +26,12 @@ import com.example.rafael.popularmovies.Utilities.Review;
 import com.example.rafael.popularmovies.Utilities.Trailer;
 import com.squareup.picasso.Picasso;
 
-import org.w3c.dom.Text;
-
 import java.util.List;
 
-public class detailActivity extends AppCompatActivity {
+public class detailActivity extends AppCompatActivity implements TrailerAdapterRV.TrailerItemClickListener{
 
+    private static final String REVIEW = "reviews";
+    private static final String VIDEOS = "videos";
     private Movies mCurrentMovie;
 
     private ImageView mMoviePoster;
@@ -34,10 +43,11 @@ public class detailActivity extends AppCompatActivity {
     private List<Review> mReviewList;
     private List<Trailer> mTrailerList;
 
-    private ListView mReviewLV;
-    private ListView mTrailerLV;
+    private RecyclerView mReviewRV;
+    private RecyclerView mTrailerRV;
 
-    private ReviewArrayAdapter mReviewArrayAdapter;
+    private ReviewRVAdapter mReviewRVAdapter;
+    private TrailerAdapterRV mTrailerAdapterRV;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,21 +59,41 @@ public class detailActivity extends AppCompatActivity {
 
 
         setupDetailView();
-        setupReviewListView();
+        setupReviewRecyclerView();
+        setupTrailerRecyclerView();
         loadMovieInfo();
-        loadReviews();
-    }
-
-    private void setupReviewListView() {
-        mReviewLV = findViewById(R.id.review_LV);
-        mReviewArrayAdapter = new ReviewArrayAdapter(this);
-        mReviewLV.setAdapter(mReviewArrayAdapter);
 
     }
 
-    private void loadReviews() {
+    private void setupTrailerRecyclerView() {
+        mTrailerRV = findViewById(R.id.trailer_RV);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this,
+                LinearLayoutManager.HORIZONTAL,
+                false);
 
-        String urlReviews = mCurrentMovie.getMovie_id() + "/reviews?api_key=" + Load.loadApiKey(this);
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(this,
+                2, GridLayoutManager.HORIZONTAL, false);
+        mTrailerRV.setLayoutManager(gridLayoutManager);
+        mTrailerAdapterRV = new TrailerAdapterRV(this);
+        mTrailerRV.setAdapter(mTrailerAdapterRV);
+        loadList(VIDEOS);
+
+    }
+
+    private void setupReviewRecyclerView() {
+        mReviewRV = findViewById(R.id.review_RV);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this,
+                LinearLayoutManager.HORIZONTAL,
+                false);
+        mReviewRV.setLayoutManager(layoutManager);
+        mReviewRVAdapter = new ReviewRVAdapter(this);
+        mReviewRV.setAdapter(mReviewRVAdapter);
+        loadList(REVIEW);
+    }
+
+    private void loadList(final String urlParameter) {
+
+        String urlReviews = mCurrentMovie.getMovie_id() + "/" + urlParameter + "?api_key=" + Load.loadApiKey(this);
 
         MovieApiInterface apiInterface = MovieController
                 .getClient()
@@ -76,10 +106,18 @@ public class detailActivity extends AppCompatActivity {
             public void onResponse(retrofit2.Call<String> call, retrofit2.Response<String> response) {
                 if (response.isSuccessful()) {
 
-                    String jsonMovieData = response.body();
+                    String jsonData = response.body();
 
-                    mReviewList = Parsing.parseFromJsonReviews(jsonMovieData);
-                    mReviewArrayAdapter.setmReviewList(mReviewList);
+                    switch (urlParameter){
+                        case REVIEW:
+                            mReviewList = Parsing.parseFromJsonReviews(jsonData);
+                            mReviewRVAdapter.setReviewList(mReviewList);
+                            break;
+                        case VIDEOS:
+                            mTrailerList = Parsing.parseFromJsonTrailers(jsonData);
+                            mTrailerAdapterRV.setReviewList(mTrailerList);
+                    }
+
                 }
             }
 
@@ -111,6 +149,49 @@ public class detailActivity extends AppCompatActivity {
         mVoteAverage = findViewById(R.id.vote_average_DV);
         mReleaseDate = findViewById(R.id.release_date_DV);
         mOverview  = findViewById(R.id.overview_DV);
+
+    }
+
+    @Override
+    public void onTrailerItemClick(Trailer clickedTrailer) {
+        // Based on https://stackoverflow.com/questions/574195/android-youtube-app-play-video-intent
+
+        String id = clickedTrailer.getKey();
+
+        Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + id));
+        Intent webIntent = new Intent(Intent.ACTION_VIEW,
+                Uri.parse("http://www.youtube.com/watch?v=" + id));
+        try {
+            startActivity(appIntent);
+        } catch (ActivityNotFoundException ex) {
+            startActivity(webIntent);
+        }
+    }
+
+    public void shareIntent(View view) {
+
+        if (mTrailerList.isEmpty()){
+            Toast.makeText(this, "Tough luck no Trailers for this inspiring Movie",
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+
+        Trailer trailer = mTrailerList.get(0);
+        String id = trailer.getKey();
+
+        // Based on https://stackoverflow.com/questions/38322233/how-to-share-a-text-link-via-text-intent
+        String textToShare = "I want to share this awesome trailer with you " +
+                "http://www.youtube.com/watch?v="+ id + " " +
+                "of the movie " + mCurrentMovie.getOriginal_title();
+
+        Intent intent = new Intent(android.content.Intent.ACTION_SEND);
+
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_SUBJECT, "Share with your friends");
+        intent.putExtra(Intent.EXTRA_TEXT, textToShare);
+
+        startActivity(Intent.createChooser(intent, "Share the awesomeness"));
 
     }
 }

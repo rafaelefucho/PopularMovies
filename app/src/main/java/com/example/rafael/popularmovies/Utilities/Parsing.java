@@ -42,15 +42,15 @@ public class Parsing {
         return null;
     }
 
-    public static List<Review> parseFromJsonReviews(String jsonMovieData) {
+    public static List<Review> parseFromJsonReviews(String jsonReviewData) {
 
         try {
             List<Review> reviewsList = new ArrayList<>();
-            JSONObject jsonObjectMovieData = new JSONObject(jsonMovieData);
-            JSONArray jsonArrayMovies = jsonObjectMovieData.getJSONArray("results");
+            JSONObject jsonObjectReviewData = new JSONObject(jsonReviewData);
+            JSONArray jsonArrayReviews = jsonObjectReviewData.getJSONArray("results");
 
-            for(int i = 0; i < jsonArrayMovies.length(); i++){
-                JSONObject movieIterator = jsonArrayMovies.getJSONObject(i);
+            for(int i = 0; i < jsonArrayReviews.length(); i++){
+                JSONObject movieIterator = jsonArrayReviews.getJSONObject(i);
 
                 String author = movieIterator.getString("author");
                 String content = movieIterator.getString("content");
@@ -66,6 +66,35 @@ public class Parsing {
             e.printStackTrace();
         }
         return null;
+
+    }
+
+    public static List<Trailer> parseFromJsonTrailers(String jsonTrailerData) {
+
+        try {
+            List<Trailer> trailersList = new ArrayList<>();
+            JSONObject jsonObjectTrailerData = new JSONObject(jsonTrailerData);
+            JSONArray jsonArrayTrailers = jsonObjectTrailerData.getJSONArray("results");
+
+            for(int i = 0; i < jsonArrayTrailers.length(); i++){
+                JSONObject movieIterator = jsonArrayTrailers.getJSONObject(i);
+
+                String key = movieIterator.getString("key");
+                String name = movieIterator.getString("name");
+
+                Trailer trailer = new Trailer(key,name);
+
+
+                trailersList.add(trailer);
+            }
+
+            return trailersList;
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
+
 
     }
 }

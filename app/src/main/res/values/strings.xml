@@ -2,4 +2,6 @@
     <string name="app_name">PopularMovies</string>
     <string name="no_internet">No internet connection. \n Make sure Wi-Fi or cellular data is turned on, \n then try again.</string>
     <string name="LV_review_author">Author:</string>
+    <string name="reviews_text">Reviews:</string>
+    <string name="trailers_text">Trailers:</string>
 </resources>

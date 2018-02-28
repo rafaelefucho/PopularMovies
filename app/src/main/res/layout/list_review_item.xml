@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
+    android:padding="2dp"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:layout_marginRight="20dp"
+    android:background="@color/colorAccentLight">
 
     <TextView
         android:textStyle="bold"
@@ -13,9 +16,9 @@
         android:layout_height="wrap_content"
         />
     <TextView
-        android:text="The Review"
+        android:text="The Review asdfasdf ;alskdjf ;asldkfj a;slkdjf ;asldkjf ;asldkfj a;sldkfj a;sldkfj a;sldkjf ;aslkdjf ;alskdj f"
         android:id="@+id/LV_review"
-        android:layout_width="wrap_content"
+        android:layout_width="220dp"
         android:layout_height="wrap_content" />
 
 </LinearLayout>
