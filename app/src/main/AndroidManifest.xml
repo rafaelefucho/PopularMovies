@@ -23,6 +23,12 @@
             android:parentActivityName=".MainActivity">
 
         </activity>
+        <provider
+            android:authorities="com.example.rafael.popularmovies"
+            android:name="com.example.rafael.popularmovies.data.MovieContentProvider"
+            android:exported="false"
+            ></provider>
+
     </application>
 
 </manifest>
