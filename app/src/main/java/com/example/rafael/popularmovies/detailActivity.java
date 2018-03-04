@@ -1,8 +1,12 @@
 package com.example.rafael.popularmovies;
 
 import android.content.ActivityNotFoundException;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -10,6 +14,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -24,6 +29,7 @@ import com.example.rafael.popularmovies.Utilities.Movies;
 import com.example.rafael.popularmovies.Utilities.Parsing;
 import com.example.rafael.popularmovies.Utilities.Review;
 import com.example.rafael.popularmovies.Utilities.Trailer;
+import com.example.rafael.popularmovies.data.MovieContract;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -39,6 +45,8 @@ public class detailActivity extends AppCompatActivity implements TrailerAdapterR
     private TextView mVoteAverage;
     private TextView mReleaseDate;
     private TextView mOverview;
+
+    private ImageButton mFavoriteImageButton;
 
     private List<Review> mReviewList;
     private List<Trailer> mTrailerList;
@@ -61,7 +69,22 @@ public class detailActivity extends AppCompatActivity implements TrailerAdapterR
         setupDetailView();
         setupReviewRecyclerView();
         setupTrailerRecyclerView();
+        setupFavoriteButton();
         loadMovieInfo();
+
+
+    }
+
+    private void setupFavoriteButton() {
+        mFavoriteImageButton = findViewById(R.id.favorite_button);
+
+        if(movieExistInFavorites()){
+            mFavoriteImageButton.setImageResource(R.drawable.star_pressed);
+        }
+        else{
+            mFavoriteImageButton.setImageResource(R.drawable.star_unpressed);
+        }
+
 
     }
 
@@ -170,6 +193,10 @@ public class detailActivity extends AppCompatActivity implements TrailerAdapterR
 
     public void shareIntent(View view) {
 
+
+        getContentResolver().delete(MovieContract.MovieEntry.CONTENT_URI,null,null);
+
+
         if (mTrailerList.isEmpty()){
             Toast.makeText(this, "Tough luck no Trailers for this inspiring Movie",
                     Toast.LENGTH_SHORT).show();
@@ -193,5 +220,44 @@ public class detailActivity extends AppCompatActivity implements TrailerAdapterR
 
         startActivity(Intent.createChooser(intent, "Share the awesomeness"));
 
+
+
+    }
+
+    public void updateToFavorite(View view) {
+
+        if (!movieExistInFavorites()) {
+            //Add Current movie to Favorites
+
+            Uri uriInsert = MovieContract.MovieEntry.CONTENT_URI;
+            ContentValues cv = Parsing.parseMovieToContentValues(mCurrentMovie);
+
+            getContentResolver().insert(uriInsert, cv);
+            mFavoriteImageButton.setImageResource(R.drawable.star_pressed);
+
+            Toast.makeText(this, R.string.add_to_favorites,
+                    Toast.LENGTH_SHORT).show();
+        }
+        else {
+            //Delete current movie from favorites
+
+            String movieId = mCurrentMovie.getMovie_id();
+            Uri uriDelete = MovieContract.MovieEntry.CONTENT_URI.buildUpon().appendPath(movieId).build();
+
+            getContentResolver().delete(uriDelete,null,null);
+            mFavoriteImageButton.setImageResource(R.drawable.star_unpressed);
+            Toast.makeText(this, R.string.remove_from_favorites,
+                    Toast.LENGTH_SHORT).show();
+
+        }
+    }
+
+    public boolean movieExistInFavorites(){
+        String movieId = mCurrentMovie.getMovie_id();
+        Uri uri = MovieContract.MovieEntry.CONTENT_URI.buildUpon().appendPath(movieId).build();
+
+        Cursor resultCursor = getContentResolver().query(uri,null,null,null,null);
+
+        return (resultCursor.getCount() != 0);
     }
 }

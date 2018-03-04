@@ -1,5 +1,9 @@
 package com.example.rafael.popularmovies.Utilities;
 
+import android.content.ContentValues;
+
+import com.example.rafael.popularmovies.data.MovieContract;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -96,5 +100,18 @@ public class Parsing {
         return null;
 
 
+    }
+
+    public static ContentValues parseMovieToContentValues(Movies mCurrentMovie) {
+        ContentValues resultContentValues = new ContentValues();
+
+        resultContentValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_ID, mCurrentMovie.getMovie_id());
+        resultContentValues.put(MovieContract.MovieEntry.COLUMN_OVERVIEW, mCurrentMovie.getOverview());
+        resultContentValues.put(MovieContract.MovieEntry.COLUMN_POSTER_PATH, mCurrentMovie.getPoster_path());
+        resultContentValues.put(MovieContract.MovieEntry.COLUMN_RELEASE_DATE, mCurrentMovie.getRelease_date());
+        resultContentValues.put(MovieContract.MovieEntry.COLUMN_TITLE, mCurrentMovie.getOriginal_title());
+        resultContentValues.put(MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE, mCurrentMovie.getVote_average());
+
+        return resultContentValues;
     }
 }

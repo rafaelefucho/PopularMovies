@@ -1,6 +1,7 @@
 package com.example.rafael.popularmovies;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -23,9 +24,6 @@ import com.example.rafael.popularmovies.Utilities.Parsing;
 
 import java.util.List;
 
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity implements MovieAdapterRV.MoviesItemClickListener{
 
@@ -36,19 +34,35 @@ public class MainActivity extends AppCompatActivity implements MovieAdapterRV.Mo
 
     private TextView mNoInternetTV;
 
-    final private String MOST_POPULAR = "popular";
-    final private String TOP_RATED = "top_rated";
+    static final private String MOST_POPULAR = "popular";
+    static final private String TOP_RATED = "top_rated";
+    static final private String FAVORITES = "favorites";
+
+    private String mCurrentOrderBy;
+
+    private SharedPreferences mSharedPreferences;
+    static final private String PREFERENCES = "preferences";
+    static final private String ORDER_BY = "orderBy";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        setupRecyclerView();
-        loadDatafromMoviedb(MOST_POPULAR);
+        mSharedPreferences = getSharedPreferences(PREFERENCES, MODE_PRIVATE);
+        String sortBy = mSharedPreferences.getString(ORDER_BY, null);
+        if(sortBy != null){
+            mCurrentOrderBy = sortBy;
+        }
+        else{
+            mCurrentOrderBy = MOST_POPULAR;
+        }
 
+        setupRecyclerView();
+        loadDatafromMoviedb(mCurrentOrderBy);
 
     }
+
 
     private void setupRecyclerView() {
         mMoviesRV = findViewById(R.id.recyclerview_movies);
@@ -73,7 +87,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapterRV.Mo
             mNoInternetTV.setVisibility(View.GONE);
         }
 
-        //String url = "http://api.themoviedb.org/3/movie/popular?api_key=" + "1f603ccb7cbe37247347e5a8fbaae643";
+        //String url = "http://api.themoviedb.org/3/movie/popular?api_key=" + " your API";
 
         MovieApiInterface apiInterface = MovieController
                 .getClient()
@@ -125,13 +139,20 @@ public class MainActivity extends AppCompatActivity implements MovieAdapterRV.Mo
                         //Most Popular
                         loadDatafromMoviedb(MOST_POPULAR);
                         setTitle("Most Popular");
+                        mCurrentOrderBy = MOST_POPULAR;
                         break;
                     case 1:
                         //Top rated
                         loadDatafromMoviedb(TOP_RATED);
                         setTitle("Top Rated");
+                        mCurrentOrderBy = TOP_RATED;
                         break;
                 }
+
+                SharedPreferences.Editor editor = mSharedPreferences.edit();
+                editor.putString(ORDER_BY,mCurrentOrderBy);
+                editor.commit();
+
             }
 
             @Override
