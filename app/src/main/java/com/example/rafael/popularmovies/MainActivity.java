@@ -2,7 +2,11 @@ package com.example.rafael.popularmovies;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.os.Bundle;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -21,11 +25,16 @@ import com.example.rafael.popularmovies.Utilities.Load;
 import com.example.rafael.popularmovies.Utilities.Movies;
 import com.example.rafael.popularmovies.Utilities.NetworkUtils;
 import com.example.rafael.popularmovies.Utilities.Parsing;
+import com.example.rafael.popularmovies.data.MovieContract;
 
 import java.util.List;
 
 
-public class MainActivity extends AppCompatActivity implements MovieAdapterRV.MoviesItemClickListener{
+public class MainActivity extends AppCompatActivity implements
+        MovieAdapterRV.MoviesItemClickListener,
+        LoaderManager.LoaderCallbacks<Cursor>{
+
+    private static final int TASK_LOADER_ID = 0;
 
     private List<Movies> mMoviesList;
 
@@ -43,6 +52,8 @@ public class MainActivity extends AppCompatActivity implements MovieAdapterRV.Mo
     private SharedPreferences mSharedPreferences;
     static final private String PREFERENCES = "preferences";
     static final private String ORDER_BY = "orderBy";
+
+    private boolean mUserIsInteracting;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapterRV.Mo
     }
 
 
+
     private void setupRecyclerView() {
         mMoviesRV = findViewById(R.id.recyclerview_movies);
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(this, 3);
@@ -77,6 +89,21 @@ public class MainActivity extends AppCompatActivity implements MovieAdapterRV.Mo
 
     private void loadDatafromMoviedb(String sortBy) {
 
+        switch (sortBy){
+            case FAVORITES:
+                getSupportLoaderManager().restartLoader(TASK_LOADER_ID, null,MainActivity.this);
+                setTitle("Favorites");
+                return;
+
+            case MOST_POPULAR:
+                setTitle("Most Popular");
+                break;
+
+            case TOP_RATED:
+                setTitle("Top Rated");
+                break;
+        }
+
         if (!NetworkUtils.isInternetConnectionAvailable(MainActivity.this)) {
             mMoviesRV.setVisibility(View.GONE);
             mNoInternetTV.setVisibility(View.VISIBLE);
@@ -86,6 +113,8 @@ public class MainActivity extends AppCompatActivity implements MovieAdapterRV.Mo
             mMoviesRV.setVisibility(View.VISIBLE);
             mNoInternetTV.setVisibility(View.GONE);
         }
+
+
 
         //String url = "http://api.themoviedb.org/3/movie/popular?api_key=" + " your API";
 
@@ -134,18 +163,21 @@ public class MainActivity extends AppCompatActivity implements MovieAdapterRV.Mo
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
 
+                if (!mUserIsInteracting) return;
                 switch (position){
                     case 0:
                         //Most Popular
                         loadDatafromMoviedb(MOST_POPULAR);
-                        setTitle("Most Popular");
                         mCurrentOrderBy = MOST_POPULAR;
                         break;
                     case 1:
                         //Top rated
                         loadDatafromMoviedb(TOP_RATED);
-                        setTitle("Top Rated");
                         mCurrentOrderBy = TOP_RATED;
+                        break;
+                    case 2:
+                        getSupportLoaderManager().restartLoader(TASK_LOADER_ID, null,MainActivity.this);
+                        mCurrentOrderBy = FAVORITES;
                         break;
                 }
 
@@ -169,5 +201,54 @@ public class MainActivity extends AppCompatActivity implements MovieAdapterRV.Mo
         Intent detailActivity = new Intent(this, detailActivity.class);
         detailActivity.putExtra("currentMovie", clickedMovie);
         startActivity(detailActivity);
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return new AsyncTaskLoader<Cursor>(this) {
+
+            Cursor mTaskData = null;
+
+            @Override
+            protected void onStartLoading() {
+                super.onStartLoading();
+                if(mTaskData != null){
+                    deliverResult(mTaskData);
+                }
+                else{
+                    forceLoad();
+                }
+            }
+
+            @Override
+            public Cursor loadInBackground() {
+                return getContentResolver().query(MovieContract.MovieEntry.CONTENT_URI,
+                        null,
+                        null,
+                        null,
+                        null
+                );
+            }
+        };
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor dataMovies) {
+        mMoviesList = Parsing.parseFromCursorToMovieList(dataMovies);
+        mMovieAdapterRV.setMovieList(mMoviesList);
+        mMoviesRV.setVisibility(View.VISIBLE);
+        mNoInternetTV.setVisibility(View.GONE);
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+
+    }
+
+    @Override
+    public void onUserInteraction() {
+        super.onUserInteraction();
+        mUserIsInteracting = true;
     }
 }

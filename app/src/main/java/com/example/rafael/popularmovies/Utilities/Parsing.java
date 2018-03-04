@@ -1,6 +1,8 @@
 package com.example.rafael.popularmovies.Utilities;
 
 import android.content.ContentValues;
+import android.database.Cursor;
+import android.graphics.Movie;
 
 import com.example.rafael.popularmovies.data.MovieContract;
 
@@ -113,5 +115,25 @@ public class Parsing {
         resultContentValues.put(MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE, mCurrentMovie.getVote_average());
 
         return resultContentValues;
+    }
+
+    public static List<Movies> parseFromCursorToMovieList(Cursor dataMovies) {
+        //Based on https://stackoverflow.com/questions/10723770/whats-the-best-way-to-iterate-an-android-cursor
+        List<Movies> moviesList = new ArrayList<>();
+
+        for (dataMovies.moveToFirst(); !dataMovies.isAfterLast(); dataMovies.moveToNext()) {
+
+            String movieId = dataMovies.getString(dataMovies.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_ID));
+            String overview = dataMovies.getString(dataMovies.getColumnIndex(MovieContract.MovieEntry.COLUMN_OVERVIEW));
+            String posterPath = dataMovies.getString(dataMovies.getColumnIndex(MovieContract.MovieEntry.COLUMN_POSTER_PATH));
+            String releaseDate = dataMovies.getString(dataMovies.getColumnIndex(MovieContract.MovieEntry.COLUMN_RELEASE_DATE));
+            String title = dataMovies.getString(dataMovies.getColumnIndex(MovieContract.MovieEntry.COLUMN_TITLE));
+            String voteAverage = dataMovies.getString(dataMovies.getColumnIndex(MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE));
+
+            Movies movie = new Movies(title,posterPath,overview,voteAverage,releaseDate, movieId);
+            moviesList.add(movie);
+        }
+
+        return moviesList;
     }
 }

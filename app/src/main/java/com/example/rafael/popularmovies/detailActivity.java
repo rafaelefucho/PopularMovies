@@ -116,6 +116,7 @@ public class detailActivity extends AppCompatActivity implements TrailerAdapterR
 
     private void loadList(final String urlParameter) {
 
+
         String urlReviews = mCurrentMovie.getMovie_id() + "/" + urlParameter + "?api_key=" + Load.loadApiKey(this);
 
         MovieApiInterface apiInterface = MovieController
@@ -193,8 +194,6 @@ public class detailActivity extends AppCompatActivity implements TrailerAdapterR
 
     public void shareIntent(View view) {
 
-
-        getContentResolver().delete(MovieContract.MovieEntry.CONTENT_URI,null,null);
 
 
         if (mTrailerList.isEmpty()){
