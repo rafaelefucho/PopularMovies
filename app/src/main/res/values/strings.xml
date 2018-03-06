@@ -6,4 +6,6 @@
     <string name="trailers_text">Trailers:</string>
     <string name="remove_from_favorites">Movie removed from favorites</string>
     <string name="add_to_favorites">Movie added to favorites</string>
+    <string name="tough_luck">Tough luck no Trailers for this inspiring Movie</string>
+    <string name="share_movie_with_you">I want to share this awesome trailer with you</string>
 </resources>

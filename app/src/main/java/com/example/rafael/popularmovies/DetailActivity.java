@@ -5,18 +5,15 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
-import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.Html;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ListView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,10 +31,13 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-public class detailActivity extends AppCompatActivity implements TrailerAdapterRV.TrailerItemClickListener{
+public class DetailActivity extends AppCompatActivity implements TrailerAdapterRV.TrailerItemClickListener{
 
     private static final String REVIEW = "reviews";
     private static final String VIDEOS = "videos";
+    private static final String SCROLL_POSITION = "SCROLL_POSITION";
+    private int[] mPositionScrollView;
+
     private Movies mCurrentMovie;
 
     private ImageView mMoviePoster;
@@ -45,6 +45,7 @@ public class detailActivity extends AppCompatActivity implements TrailerAdapterR
     private TextView mVoteAverage;
     private TextView mReleaseDate;
     private TextView mOverview;
+    private ScrollView mScrollView;
 
     private ImageButton mFavoriteImageButton;
 
@@ -64,7 +65,6 @@ public class detailActivity extends AppCompatActivity implements TrailerAdapterR
 
         Intent intent = getIntent();
         mCurrentMovie = (Movies) intent.getParcelableExtra("currentMovie");
-
 
         setupDetailView();
         setupReviewRecyclerView();
@@ -142,6 +142,7 @@ public class detailActivity extends AppCompatActivity implements TrailerAdapterR
                             mTrailerAdapterRV.setReviewList(mTrailerList);
                     }
 
+                    moveToPosition();
                 }
             }
 
@@ -152,6 +153,18 @@ public class detailActivity extends AppCompatActivity implements TrailerAdapterR
         });
 
 
+    }
+
+    private void moveToPosition() {
+
+        mScrollView.post(new Runnable() {
+            public void run() {
+                //mScrollView.scrollTo(position[0], position[1]);
+                if (mPositionScrollView != null) {
+                    mScrollView.scrollTo(mPositionScrollView[0], mPositionScrollView[1]);
+                }
+            }
+        });
     }
 
     private void loadMovieInfo() {
@@ -165,9 +178,11 @@ public class detailActivity extends AppCompatActivity implements TrailerAdapterR
         Picasso.with(this)
                 .load("http://image.tmdb.org/t/p/w185/" + mCurrentMovie.getPoster_path())
                 .into(mMoviePoster);
+
     }
 
     private void setupDetailView() {
+        mScrollView = findViewById(R.id.activity_detail_scroll_view);
         mMoviePoster = findViewById(R.id.movie_poster_image_DV);
         mTitle = findViewById(R.id.movie_title_DV);
         mVoteAverage = findViewById(R.id.vote_average_DV);
@@ -193,11 +208,8 @@ public class detailActivity extends AppCompatActivity implements TrailerAdapterR
     }
 
     public void shareIntent(View view) {
-
-
-
         if (mTrailerList.isEmpty()){
-            Toast.makeText(this, "Tough luck no Trailers for this inspiring Movie",
+            Toast.makeText(this, getString(R.string.tough_luck),
                     Toast.LENGTH_SHORT).show();
             return;
         }
@@ -207,7 +219,7 @@ public class detailActivity extends AppCompatActivity implements TrailerAdapterR
         String id = trailer.getKey();
 
         // Based on https://stackoverflow.com/questions/38322233/how-to-share-a-text-link-via-text-intent
-        String textToShare = "I want to share this awesome trailer with you " +
+        String textToShare = getString(R.string.share_movie_with_you) +
                 "http://www.youtube.com/watch?v="+ id + " " +
                 "of the movie " + mCurrentMovie.getOriginal_title();
 
@@ -218,8 +230,6 @@ public class detailActivity extends AppCompatActivity implements TrailerAdapterR
         intent.putExtra(Intent.EXTRA_TEXT, textToShare);
 
         startActivity(Intent.createChooser(intent, "Share the awesomeness"));
-
-
 
     }
 
@@ -258,5 +268,21 @@ public class detailActivity extends AppCompatActivity implements TrailerAdapterR
         Cursor resultCursor = getContentResolver().query(uri,null,null,null,null);
 
         return (resultCursor.getCount() != 0);
+    }
+
+
+    // based on https://asishinwp.wordpress.com/2013/04/15/save-scrollview-position-resume-scrollview-from-that-position/
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mPositionScrollView = new int[]{mScrollView.getScrollX(), mScrollView.getScrollY()};
+        outState.putIntArray(SCROLL_POSITION,
+                new int[]{ mScrollView.getScrollX(), mScrollView.getScrollY()});
+    }
+
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        final int[] position = savedInstanceState.getIntArray(SCROLL_POSITION);
+        mPositionScrollView = new int[]{position[0], position[1]};
+
     }
 }

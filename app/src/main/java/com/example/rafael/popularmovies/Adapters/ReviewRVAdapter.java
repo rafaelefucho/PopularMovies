@@ -7,9 +7,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.example.rafael.popularmovies.DetailActivity;
 import com.example.rafael.popularmovies.R;
 import com.example.rafael.popularmovies.Utilities.Review;
-import com.example.rafael.popularmovies.detailActivity;
 
 import java.util.List;
 
@@ -22,7 +22,7 @@ public class ReviewRVAdapter extends RecyclerView.Adapter<ReviewRVAdapter.Review
     private Context mContext;
     private List<Review> mReviewList;
 
-    public ReviewRVAdapter(detailActivity detailActivity) {
+    public ReviewRVAdapter(DetailActivity detailActivity) {
         mContext = detailActivity;
     }
 

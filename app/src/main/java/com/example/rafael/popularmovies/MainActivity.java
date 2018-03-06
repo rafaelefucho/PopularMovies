@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.Parcelable;
+import android.os.PersistableBundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
@@ -35,6 +37,9 @@ public class MainActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor>{
 
     private static final int TASK_LOADER_ID = 0;
+    private static final String SAVED_LAYOUT_MANAGER = "recyclerView.layout" ;
+
+    private int mFirstVisiblePositionRecyclerView;
 
     private List<Movies> mMoviesList;
 
@@ -134,6 +139,7 @@ public class MainActivity extends AppCompatActivity implements
 
                     mMoviesList = Parsing.parseFromJsonMovies(jsonMovieData);
                     mMovieAdapterRV.setMovieList(mMoviesList);
+                    restoreLayoutManagerPosition();
                 }
             }
 
@@ -142,6 +148,12 @@ public class MainActivity extends AppCompatActivity implements
 
             }
         });
+
+    }
+
+    private void restoreLayoutManagerPosition() {
+
+        mMoviesRV.getLayoutManager().scrollToPosition(mFirstVisiblePositionRecyclerView);
 
     }
 
@@ -198,7 +210,7 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onMovieItemClick(Movies clickedMovie) {
-        Intent detailActivity = new Intent(this, detailActivity.class);
+        Intent detailActivity = new Intent(this, DetailActivity.class);
         detailActivity.putExtra("currentMovie", clickedMovie);
         startActivity(detailActivity);
     }
@@ -236,6 +248,8 @@ public class MainActivity extends AppCompatActivity implements
     public void onLoadFinished(Loader<Cursor> loader, Cursor dataMovies) {
         mMoviesList = Parsing.parseFromCursorToMovieList(dataMovies);
         mMovieAdapterRV.setMovieList(mMoviesList);
+        restoreLayoutManagerPosition();
+
         mMoviesRV.setVisibility(View.VISIBLE);
         mNoInternetTV.setVisibility(View.GONE);
 
@@ -250,5 +264,20 @@ public class MainActivity extends AppCompatActivity implements
     public void onUserInteraction() {
         super.onUserInteraction();
         mUserIsInteracting = true;
+    }
+
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        int firstVisiblePosition = ((GridLayoutManager)mMoviesRV.getLayoutManager()).findFirstVisibleItemPosition();
+        outState.putInt("firstVisiblePosition", firstVisiblePosition);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        mFirstVisiblePositionRecyclerView = savedInstanceState.getInt("firstVisiblePosition");
     }
 }
